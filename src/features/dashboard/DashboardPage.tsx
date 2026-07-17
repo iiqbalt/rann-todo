@@ -17,7 +17,11 @@ import {
 import { ListTodo, Plus } from 'lucide-react'
 import type { Task } from '@/db/schema'
 
-import { useReorderTasks, useTasks } from '@/features/tasks'
+import {
+  useArchiveOnMount,
+  useDashboardTasks,
+  useReorderTasks,
+} from '@/features/tasks'
 import { Board, type BoardStatus } from '@/components/task/Board'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { TaskCard } from '@/components/task/TaskCard'
@@ -29,20 +33,31 @@ type ReorderItem = {
   status: BoardStatus
 }
 
+function byPosition(a: Task, b: Task) {
+  return a.position - b.position
+}
+
 export function DashboardPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
 
-  const { data: todoTasks = [] } = useTasks('TODO')
-  const { data: inProgressTasks = [] } = useTasks('IN_PROGRESS')
+  // Single network request for both boards (Phase 1)
+  const { data: allTasks = [] } = useDashboardTasks()
   const reorder = useReorderTasks()
 
-  // PRD step 10 — auto-archive runs as a side-effect of `getTasks` server fn
-  // (see src/server/tasks/queries.ts). Each call to getTasks is itself
-  // triggered when useTasks mounts/refetches, so we don't need an explicit
-  // archive.mutate() on mount — it would just add a redundant POST and risk
-  // feedback loops in dev mode.
+  // Non-blocking archive on mount (Phase 2) — does not block first paint
+  useArchiveOnMount()
+
+  const todoTasks = useMemo(
+    () => allTasks.filter((t) => t.status === 'TODO').sort(byPosition),
+    [allTasks],
+  )
+  const inProgressTasks = useMemo(
+    () =>
+      allTasks.filter((t) => t.status === 'IN_PROGRESS').sort(byPosition),
+    [allTasks],
+  )
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

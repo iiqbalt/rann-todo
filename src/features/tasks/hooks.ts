@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import {
   useMutation,
   useQuery,
@@ -20,6 +21,8 @@ import { historyKeys } from '@/features/history/api'
 import { taskKeys } from './api'
 
 type TaskStatusFilter = 'TODO' | 'IN_PROGRESS'
+
+const TASKS_STALE_TIME_MS = 30_000
 
 export type UpdateTaskVariables = {
   id: string
@@ -66,11 +69,39 @@ function rollback(
   }
 }
 
+/**
+ * Single dashboard query for all active tasks (TODO + IN_PROGRESS).
+ * Prefer this over calling useTasks twice — halves network roundtrips.
+ */
+export function useDashboardTasks() {
+  return useQuery({
+    queryKey: taskKeys.list(),
+    queryFn: () => getTasks({ data: {} }),
+    staleTime: TASKS_STALE_TIME_MS,
+  })
+}
+
 export function useTasks(status?: TaskStatusFilter) {
   return useQuery({
     queryKey: status ? taskKeys.list({ status }) : taskKeys.list(),
     queryFn: () => getTasks({ data: status ? { status } : {} }),
+    staleTime: TASKS_STALE_TIME_MS,
   })
+}
+
+/**
+ * Fire-and-forget archive on mount. Only invalidates caches if rows changed,
+ * so a no-op archive does not force an extra dashboard refetch.
+ */
+export function useArchiveOnMount() {
+  const archive = useArchiveExpiredTasks()
+  const didRun = useRef(false)
+
+  useEffect(() => {
+    if (didRun.current) return
+    didRun.current = true
+    archive.mutate()
+  }, [archive])
 }
 
 export function useCreateTask() {
@@ -242,9 +273,13 @@ export function useArchiveExpiredTasks() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: () => archiveExpiredTasksFn(),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: taskKeys.lists() })
-      qc.invalidateQueries({ queryKey: historyKeys.lists() })
+    onSuccess: (data) => {
+      // Only refetch if something actually changed — avoids extra dashboard
+      // roundtrip when archive is a no-op (most page loads).
+      if (data.archived > 0) {
+        qc.invalidateQueries({ queryKey: taskKeys.lists() })
+        qc.invalidateQueries({ queryKey: historyKeys.lists() })
+      }
     },
   })
 }
