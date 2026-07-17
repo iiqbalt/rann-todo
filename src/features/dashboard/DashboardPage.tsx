@@ -1,0 +1,264 @@
+import { useMemo, useState } from 'react'
+import {
+  closestCorners,
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable'
+import { ListTodo, Plus } from 'lucide-react'
+import type { Task } from '@/db/schema'
+
+import { useReorderTasks, useTasks } from '@/features/tasks'
+import { Board, type BoardStatus } from '@/components/task/Board'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { TaskCard } from '@/components/task/TaskCard'
+import { TaskEditorModal } from '@/components/task/TaskEditorModal'
+
+type ReorderItem = {
+  id: string
+  position: number
+  status: BoardStatus
+}
+
+export function DashboardPage() {
+  const [createOpen, setCreateOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
+
+  const { data: todoTasks = [] } = useTasks('TODO')
+  const { data: inProgressTasks = [] } = useTasks('IN_PROGRESS')
+  const reorder = useReorderTasks()
+
+  // PRD step 10 — auto-archive runs as a side-effect of `getTasks` server fn
+  // (see src/server/tasks/queries.ts). Each call to getTasks is itself
+  // triggered when useTasks mounts/refetches, so we don't need an explicit
+  // archive.mutate() on mount — it would just add a redundant POST and risk
+  // feedback loops in dev mode.
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  const tasksByStatus = useMemo<Record<BoardStatus, Task[]>>(
+    () => ({
+      TODO: todoTasks,
+      IN_PROGRESS: inProgressTasks,
+    }),
+    [todoTasks, inProgressTasks],
+  )
+
+  const findTask = (id: string): Task | undefined =>
+    tasksByStatus.TODO.find((t) => t.id === id) ??
+    tasksByStatus.IN_PROGRESS.find((t) => t.id === id)
+
+  const computeUpdates = (
+    sourceId: string,
+    sourceStatus: BoardStatus,
+    destStatus: BoardStatus,
+    sourceIndex: number,
+    destIndex: number,
+  ): ReorderItem[] => {
+    const sourceBoard = [...tasksByStatus[sourceStatus]]
+
+    if (sourceStatus === destStatus) {
+      const reordered = arrayMove(sourceBoard, sourceIndex, destIndex)
+      const updates: ReorderItem[] = []
+      reordered.forEach((task, idx) => {
+        if (task.position !== idx) {
+          updates.push({ id: task.id, position: idx, status: sourceStatus })
+        }
+      })
+      return updates
+    }
+
+    const moved = sourceBoard[sourceIndex]
+    const destBoard = [...tasksByStatus[destStatus]]
+    const newDest = [...destBoard]
+    newDest.splice(destIndex, 0, { ...moved, status: destStatus })
+
+    const newSource = sourceBoard.filter((_, i) => i !== sourceIndex)
+
+    const updates: ReorderItem[] = []
+    newSource.forEach((task, idx) => {
+      if (task.position !== idx) {
+        updates.push({ id: task.id, position: idx, status: sourceStatus })
+      }
+    })
+    newDest.forEach((task, idx) => {
+      const isMoved = task.id === sourceId
+      if (task.position !== idx || isMoved) {
+        updates.push({ id: task.id, position: idx, status: destStatus })
+      }
+    })
+    return updates
+  }
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null)
+    const { active, over } = event
+    if (!over) return
+
+    const draggedId = active.id as string
+    const overId = over.id as string
+
+    if (draggedId === overId) return
+
+    const sourceTask = findTask(draggedId)
+    if (!sourceTask) return
+
+    const sourceStatus = sourceTask.status as BoardStatus
+    const sourceIndex = tasksByStatus[sourceStatus].findIndex(
+      (t: Task) => t.id === draggedId,
+    )
+
+    let destStatus: BoardStatus
+    let destIndex: number
+
+    if (overId === 'TODO' || overId === 'IN_PROGRESS') {
+      destStatus = overId
+      destIndex = tasksByStatus[destStatus].length
+    } else {
+      const overTask = findTask(overId)
+      if (!overTask) return
+      destStatus = overTask.status as BoardStatus
+      destIndex = tasksByStatus[destStatus].findIndex(
+        (t: Task) => t.id === overId,
+      )
+    }
+
+    const updates = computeUpdates(
+      draggedId,
+      sourceStatus,
+      destStatus,
+      sourceIndex,
+      destIndex,
+    )
+    if (updates.length === 0) return
+
+    reorder.mutate({ items: updates })
+  }
+
+  const handleDragCancel = () => setActiveId(null)
+
+  const activeTask = activeId ? findTask(activeId) : null
+  const modalOpen = createOpen || editingTask !== null
+  const closeModal = () => {
+    setCreateOpen(false)
+    setEditingTask(null)
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl px-8 py-10">
+      <header className="mb-8 flex items-baseline justify-between">
+        <h1 className="text-2xl font-bold uppercase tracking-widest text-pink-deep">
+          Today's Checklist
+        </h1>
+        <div className="text-sm font-medium text-muted">
+          <span className="text-ink">0</span> /{' '}
+          <span className="text-ink">
+            {todoTasks.length + inProgressTasks.length}
+          </span>
+        </div>
+      </header>
+
+      <button
+        type="button"
+        onClick={() => setCreateOpen(true)}
+        className="mb-8 flex w-full items-center gap-3 rounded-brutal border-2 border-dashed border-ink/15 bg-warm/60 px-4 py-3 text-left text-muted transition-colors hover:border-pink hover:text-ink"
+      >
+        <Plus className="h-4 w-4" />
+        <span>Add a task...</span>
+      </button>
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <div className="flex flex-col gap-6">
+          <Board
+            status="TODO"
+            title="Todo"
+            count={todoTasks.length}
+            itemIds={todoTasks.map((t) => t.id)}
+            actions={
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                aria-label="Add new task"
+                className="rounded-brutal-sm border-2 border-ink/15 bg-warm px-3 py-1 text-xs font-bold uppercase tracking-wider text-muted transition-all hover:border-ink hover:text-ink"
+              >
+                + Add
+              </button>
+            }
+          >
+            {todoTasks.length === 0 ? (
+              <EmptyState
+                icon={<ListTodo className="h-6 w-6" />}
+                title="Nothing to do"
+                description="Add a task above to get started"
+              />
+            ) : (
+              todoTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onEdit={setEditingTask}
+                />
+              ))
+            )}
+          </Board>
+
+          <Board
+            status="IN_PROGRESS"
+            title="In Progress"
+            count={inProgressTasks.length}
+            itemIds={inProgressTasks.map((t) => t.id)}
+          >
+            {inProgressTasks.length === 0 ? (
+              <EmptyState
+                icon={<ListTodo className="h-6 w-6" />}
+                title="Nothing in progress"
+                description="Start working on a task from your list"
+              />
+            ) : (
+              inProgressTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onEdit={setEditingTask}
+                />
+              ))
+            )}
+          </Board>
+        </div>
+
+        <DragOverlay>
+          {activeTask ? <TaskCard task={activeTask} /> : null}
+        </DragOverlay>
+      </DndContext>
+
+      <TaskEditorModal
+        open={modalOpen}
+        task={editingTask}
+        onClose={closeModal}
+      />
+    </div>
+  )
+}
