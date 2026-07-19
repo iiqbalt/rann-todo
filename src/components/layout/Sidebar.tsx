@@ -17,7 +17,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 
   return (
     <aside
-      className={`flex h-screen shrink-0 flex-col justify-between border-r-2 border-ink/10 bg-warm py-6 transition-[width,padding] duration-300 ease-out ${
+      className={`flex h-screen shrink-0 flex-col justify-between border-r-2 border-ink/10 bg-warm py-6 transition-[width,padding] duration-300 ease-out dark:border-dark-ink/10 dark:bg-dark-warm ${
         collapsed
           ? 'w-20 items-center px-3'
           : 'w-64 px-5'
@@ -29,11 +29,11 @@ export function Sidebar({ collapsed }: SidebarProps) {
             collapsed ? 'justify-center' : 'gap-3'
           }`}
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-brutal-sm bg-pink text-white shadow-brutal-soft">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-brutal-sm bg-pink text-white shadow-brutal-soft dark:bg-dark-pink dark:shadow-brutal-pink-dark">
             <CheckCircle2 className="h-5 w-5" strokeWidth={3} />
           </div>
           {!collapsed && (
-            <span className="text-xl font-bold text-ink">Rann Todo</span>
+            <span className="text-xl font-bold text-ink dark:text-dark-ink">Rann Todo</span>
           )}
         </div>
 
@@ -53,8 +53,8 @@ export function Sidebar({ collapsed }: SidebarProps) {
                     : 'gap-3 px-4 py-2.5 text-sm font-bold uppercase tracking-wider'
                 } ${
                   isActive
-                    ? 'border-ink bg-pink-light text-ink shadow-brutal-soft'
-                    : 'border-transparent text-muted hover:border-ink/15 hover:text-ink'
+                    ? 'border-ink bg-pink-light text-ink shadow-brutal-soft dark:border-dark-ink dark:bg-dark-pink-light dark:text-dark-ink dark:shadow-brutal-soft-dark'
+                    : 'border-transparent text-muted hover:border-ink/15 hover:text-ink dark:text-dark-muted dark:hover:border-dark-ink/15 dark:hover:text-dark-ink'
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />

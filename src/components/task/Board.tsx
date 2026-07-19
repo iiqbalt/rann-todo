@@ -27,12 +27,12 @@ export function Board({
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
-    <section className="rounded-brutal border-2 border-ink/15 bg-warm p-5 shadow-brutal-soft">
+    <section className="rounded-brutal border-2 border-ink/15 bg-warm p-5 shadow-brutal-soft dark:border-dark-ink/15 dark:bg-dark-warm dark:shadow-brutal-soft-dark">
       <header className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-ink">
+        <h2 className="text-sm font-bold uppercase tracking-widest text-ink dark:text-dark-ink">
           {title}
           {count !== undefined && (
-            <span className="ml-2 text-muted">({count})</span>
+            <span className="ml-2 text-muted dark:text-dark-muted">({count})</span>
           )}
         </h2>
         {actions && <div>{actions}</div>}
@@ -42,7 +42,7 @@ export function Board({
           ref={setNodeRef}
           data-status={status}
           className={`flex min-h-[60px] flex-col gap-2 rounded-brutal-sm border-2 border-dashed border-transparent p-1 transition-colors ${
-            isOver ? 'border-pink bg-pink-light/30' : ''
+            isOver ? 'border-pink bg-pink-light/30 dark:border-dark-pink dark:bg-dark-pink-light/30' : ''
           }`}
         >
           {children}

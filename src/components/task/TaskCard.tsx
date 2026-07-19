@@ -51,10 +51,10 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center gap-3 rounded-brutal-sm border-2 bg-warm px-4 py-3 transition-all hover:border-ink/30 hover:shadow-brutal-soft ${
+      className={`group flex items-center gap-3 rounded-brutal-sm border-2 bg-warm px-4 py-3 transition-all hover:border-ink/30 hover:shadow-brutal-soft dark:bg-dark-warm dark:hover:border-dark-ink/30 dark:hover:shadow-brutal-soft-dark ${
         isDragging
-          ? 'border-pink shadow-brutal'
-          : 'border-ink/15'
+          ? 'border-pink shadow-brutal dark:border-dark-pink dark:shadow-brutal-dark'
+          : 'border-ink/15 dark:border-dark-ink/15'
       }`}
     >
       <button
@@ -63,7 +63,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
         aria-label={
           task.status === 'IN_PROGRESS' ? 'Complete task' : 'Move to in progress'
         }
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-ink/40 transition-colors hover:border-pink hover:bg-pink-light"
+        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-ink/40 transition-colors hover:border-pink hover:bg-pink-light dark:border-dark-ink/40 dark:hover:border-dark-pink dark:hover:bg-dark-pink-light"
       />
       <button
         type="button"
@@ -72,13 +72,13 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
         {...listeners}
         className="flex flex-1 cursor-grab flex-col items-start gap-0.5 text-left active:cursor-grabbing"
       >
-        <span className="w-full truncate text-base text-ink">{task.title}</span>
+        <span className="w-full truncate text-base text-ink dark:text-dark-ink">{task.title}</span>
       </button>
       <button
         type="button"
         onClick={handleDelete}
         aria-label="Delete task"
-        className="text-muted opacity-0 transition-all hover:text-rose group-hover:opacity-100"
+        className="text-muted opacity-0 transition-all hover:text-rose group-hover:opacity-100 dark:text-dark-muted dark:hover:text-dark-rose"
       >
         <Trash2 className="h-4 w-4" />
       </button>

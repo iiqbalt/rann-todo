@@ -20,7 +20,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const toggle = () => setCollapsed((c) => !c)
 
   return (
-    <div className="flex min-h-screen bg-cream">
+    <div className="flex min-h-screen bg-cream dark:bg-dark-cream">
       <Sidebar collapsed={collapsed} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Header collapsed={collapsed} onToggle={toggle} />

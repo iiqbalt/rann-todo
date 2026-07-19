@@ -9,10 +9,10 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-pink text-ink',
-  secondary: 'bg-ivory text-ink',
-  ghost: 'bg-transparent text-ink border-transparent shadow-none',
-  destructive: 'bg-rose text-ink',
+  primary: 'bg-pink text-ink dark:bg-dark-pink dark:text-dark-ink',
+  secondary: 'bg-ivory text-ink dark:bg-dark-ivory dark:text-dark-ink',
+  ghost: 'bg-transparent text-ink border-transparent shadow-none dark:text-dark-ink',
+  destructive: 'bg-rose text-ink dark:bg-dark-rose dark:text-dark-ink',
 }
 
 const sizeClasses: Record<Size, string> = {
@@ -22,7 +22,7 @@ const sizeClasses: Record<Size, string> = {
 }
 
 const baseClasses =
-  'rounded-brutal border-2 border-ink font-semibold shadow-brutal-soft transition-[box-shadow,transform] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center gap-2 whitespace-nowrap'
+  'rounded-brutal border-2 border-ink font-semibold shadow-brutal-soft transition-[box-shadow,transform] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:pointer-events-none inline-flex items-center justify-center gap-2 whitespace-nowrap dark:border-dark-ink dark:shadow-brutal-soft-dark'
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className = '', variant = 'primary', size = 'md', ...props }, ref) => {

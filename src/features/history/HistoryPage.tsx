@@ -22,19 +22,19 @@ export function HistoryPage() {
   return (
     <div className="mx-auto max-w-3xl px-8 py-10">
       <header className="mb-8 flex items-baseline justify-between">
-        <h1 className="text-2xl font-bold uppercase tracking-widest text-pink-deep">
+        <h1 className="text-2xl font-bold uppercase tracking-widest text-pink-deep dark:text-dark-pink-deep">
           History
         </h1>
-        <div className="text-sm font-medium text-muted">
-          <span className="text-ink">{totalTasks}</span>{' '}
+        <div className="text-sm font-medium text-muted dark:text-dark-muted">
+          <span className="text-ink dark:text-dark-ink">{totalTasks}</span>{' '}
           {totalTasks === 1 ? 'task' : 'tasks'} across{' '}
-          <span className="text-ink">{groups.length}</span>{' '}
+          <span className="text-ink dark:text-dark-ink">{groups.length}</span>{' '}
           {groups.length === 1 ? 'day' : 'days'}
         </div>
       </header>
 
       {isLoading ? (
-        <div className="py-12 text-center text-muted">Loading history...</div>
+        <div className="py-12 text-center text-muted dark:text-dark-muted">Loading history...</div>
       ) : isError ? (
         <EmptyState
           icon={<HistoryIcon className="h-12 w-12" />}
@@ -51,12 +51,12 @@ export function HistoryPage() {
         <div className="flex flex-col gap-8">
           {groups.map((group) => (
             <section key={group.date}>
-              <h2 className="mb-3 flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-muted">
-                <span className="h-px flex-1 bg-ink/15" />
+              <h2 className="mb-3 flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-muted dark:text-dark-muted">
+                <span className="h-px flex-1 bg-ink/15 dark:bg-dark-ink/15" />
                 <span className="whitespace-nowrap">
                   {formatDateHeading(group.date)}
                 </span>
-                <span className="h-px flex-1 bg-ink/15" />
+                <span className="h-px flex-1 bg-ink/15 dark:bg-dark-ink/15" />
               </h2>
               <div className="flex flex-col gap-2">
                 {group.tasks

@@ -2,28 +2,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #FAF8F5;
-  --color-warm: #FFFDFB;
-  --color-ivory: #F2EBE0;
-  /* --color-purple: #C4ADE8;
-  --color-purple-deep: #9F7CD2;
-  --color-purple-light: #EFE5F8; */
-  --color-pink: #F3B3D1;
-  --color-pink-deep: #E46FA5;
-  --color-pink-light: #FDEBF4;
-  --color-ink: #1F1B16;
-  --color-muted: #908878;
-  --color-sage: #A9D4A6;
-  --color-rose: #E8B4B8;
-
   --radius-brutal: 20px;
   --radius-brutal-sm: 12px;
-
-  --shadow-brutal: 4px 4px 0 0 #1F1B16;
-  --shadow-brutal-soft: 4px 4px 0 0 rgba(31, 27, 22, 0.2);
-  --shadow-brutal-hover: 6px 6px 0 0 #1F1B16;
-  /* --shadow-brutal-purple: 4px 4px 0 0 #C4ADE8; */
-  --shadow-brutal-pink: 4px 4px 0 0 #E46FA5;
 }
 
 * { box-sizing: border-box; }
@@ -32,15 +12,92 @@ html, body, #app {
   min-height: 100%;
 }
 
+/* Light mode colors (default) */
+:root {
+  --bg-cream: #FAF8F5;
+  --bg-warm: #FFFDFB;
+  --bg-ivory: #F2EBE0;
+  --bg-pink: #F3B3D1;
+  --bg-pink-deep: #E46FA5;
+  --bg-pink-light: #FDEBF4;
+  --text-ink: #1F1B16;
+  --text-muted: #908878;
+  --text-pink-deep: #E46FA5;
+  --bg-sage: #A9D4A6;
+  --bg-rose: #E8B4B8;
+  --border-ink: #1F1B16;
+  --border-pink: #E46FA5;
+  --shadow-brutal-soft: 4px 4px 0 0 rgba(31, 27, 22, 0.2);
+  --shadow-brutal: 4px 4px 0 0 #1F1B16;
+  --shadow-brutal-pink: 4px 4px 0 0 #E46FA5;
+}
+
+/* Dark mode colors */
+.dark {
+  --bg-cream: #1a1814;
+  --bg-warm: #25221c;
+  --bg-ivory: #2f2c26;
+  --bg-pink: #d48fb0;
+  --bg-pink-deep: #c45a90;
+  --bg-pink-light: #3d2a35;
+  --text-ink: #faf8f5;
+  --text-muted: #b8b0a0;
+  --text-pink-deep: #c45a90;
+  --bg-sage: #7aa878;
+  --bg-rose: #c48a8e;
+  --border-ink: #faf8f5;
+  --border-pink: #d48fb0;
+  --shadow-brutal-soft: 4px 4px 0 0 rgba(250, 248, 245, 0.15);
+  --shadow-brutal: 4px 4px 0 0 #faf8f5;
+  --shadow-brutal-pink: 4px 4px 0 0 #c45a90;
+}
+
 dialog::backdrop {
   background-color: rgba(31, 27, 22, 0.4);
 }
 
+.dark dialog::backdrop {
+  background-color: rgba(250, 248, 245, 0.15);
+}
+
 body {
   margin: 0;
-  background: var(--color-cream);
-  color: var(--color-ink);
+  background: var(--bg-cream);
+  color: var(--text-ink);
   font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Override Tailwind classes with CSS variables */
+.bg-cream { background-color: var(--bg-cream) !important; }
+.bg-warm { background-color: var(--bg-warm) !important; }
+.bg-ivory { background-color: var(--bg-ivory) !important; }
+.bg-pink { background-color: var(--bg-pink) !important; }
+.bg-pink-light { background-color: var(--bg-pink-light) !important; }
+.bg-sage { background-color: var(--bg-sage) !important; }
+.bg-rose { background-color: var(--bg-rose) !important; }
+
+.text-ink { color: var(--text-ink) !important; }
+.text-muted { color: var(--text-muted) !important; }
+.text-pink-deep { color: var(--text-pink-deep) !important; }
+.text-rose { color: var(--bg-rose) !important; }
+
+.border-ink { border-color: var(--border-ink) !important; }
+.border-ink\/10 { border-color: rgba(31, 27, 22, 0.1) !important; }
+.dark .border-ink\/10 { border-color: rgba(250, 248, 245, 0.1) !important; }
+.border-ink\/15 { border-color: rgba(31, 27, 22, 0.15) !important; }
+.dark .border-ink\/15 { border-color: rgba(250, 248, 245, 0.15) !important; }
+.border-ink\/20 { border-color: rgba(31, 27, 22, 0.2) !important; }
+.dark .border-ink\/20 { border-color: rgba(250, 248, 245, 0.2) !important; }
+.border-ink\/30 { border-color: rgba(31, 27, 22, 0.3) !important; }
+.dark .border-ink\/30 { border-color: rgba(250, 248, 245, 0.3) !important; }
+.border-ink\/40 { border-color: rgba(31, 27, 22, 0.4) !important; }
+.dark .border-ink\/40 { border-color: rgba(250, 248, 245, 0.4) !important; }
+
+.border-pink { border-color: var(--border-pink) !important; }
+
+.shadow-brutal-soft { box-shadow: var(--shadow-brutal-soft) !important; }
+.shadow-brutal { box-shadow: var(--shadow-brutal) !important; }
+.shadow-brutal-pink { box-shadow: var(--shadow-brutal-pink) !important; }

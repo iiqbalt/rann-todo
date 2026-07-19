@@ -179,12 +179,12 @@ export function DashboardPage() {
   return (
     <div className="mx-auto max-w-3xl px-8 py-10">
       <header className="mb-8 flex items-baseline justify-between">
-        <h1 className="text-2xl font-bold uppercase tracking-widest text-pink-deep">
+        <h1 className="text-2xl font-bold uppercase tracking-widest text-pink-deep dark:text-dark-pink-deep">
           Today's Checklist
         </h1>
-        <div className="text-sm font-medium text-muted">
-          <span className="text-ink">0</span> /{' '}
-          <span className="text-ink">
+        <div className="text-sm font-medium text-muted dark:text-dark-muted">
+          <span className="text-ink dark:text-dark-ink">0</span> /{' '}
+          <span className="text-ink dark:text-dark-ink">
             {todoTasks.length + inProgressTasks.length}
           </span>
         </div>
@@ -193,7 +193,7 @@ export function DashboardPage() {
       <button
         type="button"
         onClick={() => setCreateOpen(true)}
-        className="mb-8 flex w-full items-center gap-3 rounded-brutal border-2 border-dashed border-ink/15 bg-warm/60 px-4 py-3 text-left text-muted transition-colors hover:border-pink hover:text-ink"
+        className="mb-8 flex w-full items-center gap-3 rounded-brutal border-2 border-dashed border-ink/15 bg-warm/60 px-4 py-3 text-left text-muted transition-colors hover:border-pink hover:text-ink dark:border-dark-ink/15 dark:bg-dark-warm/60 dark:text-dark-muted dark:hover:border-dark-pink dark:hover:text-dark-ink"
       >
         <Plus className="h-4 w-4" />
         <span>Add a task...</span>

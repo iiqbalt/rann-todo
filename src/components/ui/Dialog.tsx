@@ -40,10 +40,10 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
     <dialog
       ref={ref}
       onClick={handleBackdropClick}
-      className="m-auto rounded-brutal border-2 border-ink bg-warm p-6 text-ink shadow-brutal outline-none"
+      className="m-auto rounded-brutal border-2 border-ink bg-warm p-6 text-ink shadow-brutal outline-none dark:border-dark-ink dark:bg-dark-warm dark:text-dark-ink dark:shadow-brutal-dark"
     >
       {title && (
-        <h2 className="mb-4 text-lg font-bold uppercase tracking-widest text-ink">
+        <h2 className="mb-4 text-lg font-bold uppercase tracking-widest text-ink dark:text-dark-ink">
           {title}
         </h2>
       )}

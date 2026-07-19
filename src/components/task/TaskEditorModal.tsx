@@ -63,7 +63,7 @@ export function TaskEditorModal({ open, task, onClose }: TaskEditorModalProps) {
     >
       <form onSubmit={handleSubmit} className="flex w-md flex-col gap-4">
         <label className="flex flex-col gap-1">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted">
+          <span className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
             Title
           </span>
           <Input
@@ -76,7 +76,7 @@ export function TaskEditorModal({ open, task, onClose }: TaskEditorModalProps) {
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted">
+          <span className="text-xs font-bold uppercase tracking-wider text-muted dark:text-dark-muted">
             Note (optional)
           </span>
           <Textarea
