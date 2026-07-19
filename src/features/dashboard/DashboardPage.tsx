@@ -212,16 +212,6 @@ export function DashboardPage() {
             title="Todo"
             count={todoTasks.length}
             itemIds={todoTasks.map((t) => t.id)}
-            actions={
-              <button
-                type="button"
-                onClick={() => setCreateOpen(true)}
-                aria-label="Add new task"
-                className="rounded-brutal-sm border-2 border-ink/15 bg-warm px-3 py-1 text-xs font-bold uppercase tracking-wider text-muted transition-all hover:border-ink hover:text-ink"
-              >
-                + Add
-              </button>
-            }
           >
             {todoTasks.length === 0 ? (
               <EmptyState

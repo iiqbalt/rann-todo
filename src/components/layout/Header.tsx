@@ -21,10 +21,6 @@ export function Header({ collapsed, onToggle }: HeaderProps) {
           <PanelLeftClose className="h-4 w-4" />
         )}
       </button>
-
-      <div className="text-xs font-bold uppercase tracking-widest text-muted">
-        Daily Todo Workspace
-      </div>
     </header>
   )
 }

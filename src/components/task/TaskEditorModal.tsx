@@ -61,7 +61,7 @@ export function TaskEditorModal({ open, task, onClose }: TaskEditorModalProps) {
       onClose={onClose}
       title={isEdit ? 'Edit Task' : 'New Task'}
     >
-      <form onSubmit={handleSubmit} className="flex w-80 flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex w-md flex-col gap-4">
         <label className="flex flex-col gap-1">
           <span className="text-xs font-bold uppercase tracking-wider text-muted">
             Title
@@ -83,7 +83,8 @@ export function TaskEditorModal({ open, task, onClose }: TaskEditorModalProps) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Add some details..."
-            rows={3}
+            rows={6}
+            className="resize-y"
           />
         </label>
 
