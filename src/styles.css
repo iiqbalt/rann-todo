@@ -95,6 +95,9 @@ body {
 .bg-pink {
   background-color: var(--bg-pink) !important;
 }
+.bg-pink-deep {
+  background-color: var(--bg-pink-deep) !important;
+}
 .bg-pink-light {
   background-color: var(--bg-pink-light) !important;
 }

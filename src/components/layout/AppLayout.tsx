@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
+import { PomodoroDock, PomodoroProvider } from '@/features/pomodoro'
 
 const STORAGE_KEY = 'rann:sidebar-collapsed'
 
@@ -20,12 +21,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const toggle = () => setCollapsed((c) => !c)
 
   return (
-    <div className="flex min-h-screen bg-cream dark:bg-dark-cream">
-      <Sidebar collapsed={collapsed} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header collapsed={collapsed} onToggle={toggle} />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+    <PomodoroProvider>
+      <div className="flex min-h-screen bg-cream dark:bg-dark-cream">
+        <Sidebar collapsed={collapsed} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Header collapsed={collapsed} onToggle={toggle} />
+          <main className="flex-1 overflow-y-auto">{children}</main>
+        </div>
       </div>
-    </div>
+      <PomodoroDock />
+    </PomodoroProvider>
   )
 }
