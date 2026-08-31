@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, eq, lt } from 'drizzle-orm'
+import { z } from 'zod'
+import { and, eq, isNull, lt } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { tasks } from '@/db/schema'
@@ -11,6 +12,9 @@ import { getCurrentUserId } from '@/server/auth'
  * Rule: every time Dashboard loads:
  *   IF completed_at < today (start-of-day, local time)
  *   THEN status = 'ARCHIVED', archived_at = NOW()
+ *
+ * Now workspace-scoped: the caller passes a `workspaceId` and we only
+ * archive within that workspace. Pass `null` for the default workspace.
  *
  * Invariants:
  *  - Idempotent: running twice is safe. Rows already in ARCHIVED status are
@@ -26,6 +30,10 @@ import { getCurrentUserId } from '@/server/auth'
  *  blocked by archive writes.
  */
 
+const archiveSchema = z.object({
+  workspaceId: z.string().uuid().nullable().optional(),
+})
+
 function startOfToday(): Date {
   const now = new Date()
   now.setHours(0, 0, 0, 0)
@@ -34,19 +42,28 @@ function startOfToday(): Date {
 
 /**
  * Internal helper. Archives COMPLETED tasks whose completion precedes today's
- * start-of-day for the given user. Returns the number of rows archived.
+ * start-of-day for the given user within the given workspace.
+ * Returns the number of rows archived.
  */
 export async function archiveExpiredTasksInternal({
   userId,
+  workspaceId,
 }: {
   userId: string
+  workspaceId: string | null
 }): Promise<number> {
+  const workspaceClause =
+    workspaceId === null
+      ? isNull(tasks.workspaceId)
+      : eq(tasks.workspaceId, workspaceId)
+
   const result = await db
     .update(tasks)
     .set({ status: 'ARCHIVED', archivedAt: new Date() })
     .where(
       and(
         eq(tasks.userId, userId),
+        workspaceClause,
         eq(tasks.status, 'COMPLETED'),
         lt(tasks.completedAt, startOfToday()),
       ),
@@ -60,10 +77,11 @@ export async function archiveExpiredTasksInternal({
  * Public server function — manual/explicit archive trigger.
  * Used by Dashboard mount (fire-and-forget) and potential cron/admin tools.
  */
-export const archiveExpiredTasks = createServerFn({ method: 'POST' }).handler(
-  async () => {
+export const archiveExpiredTasks = createServerFn({ method: 'POST' })
+  .inputValidator(archiveSchema)
+  .handler(async ({ data }) => {
     const userId = await getCurrentUserId()
-    const archived = await archiveExpiredTasksInternal({ userId })
+    const workspaceId = data.workspaceId ?? null
+    const archived = await archiveExpiredTasksInternal({ userId, workspaceId })
     return { archived }
-  },
-)
+  })

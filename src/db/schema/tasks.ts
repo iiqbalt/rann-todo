@@ -8,6 +8,7 @@ import {
 } from 'drizzle-orm/pg-core'
 
 import { users } from './users'
+import { workspaces } from './workspaces'
 import { taskStatusEnum } from './enums'
 
 export const tasks = pgTable(
@@ -17,6 +18,9 @@ export const tasks = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    workspaceId: uuid('workspace_id').references(() => workspaces.id, {
+      onDelete: 'set null',
+    }),
     title: text().notNull(),
     description: text(),
     status: taskStatusEnum('status').notNull().default('TODO'),
@@ -40,6 +44,15 @@ export const tasks = pgTable(
       table.position,
     ),
     index('tasks_user_completed_at_idx').on(table.userId, table.completedAt),
+    index('tasks_workspace_status_position_idx').on(
+      table.workspaceId,
+      table.status,
+      table.position,
+    ),
+    index('tasks_workspace_completed_at_idx').on(
+      table.workspaceId,
+      table.completedAt,
+    ),
   ],
 )
 

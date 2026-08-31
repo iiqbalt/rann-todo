@@ -1,10 +1,6 @@
 import { useEffect, useRef } from 'react'
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  type QueryClient,
-} from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
 import type { Task } from '@/db/schema'
 
 import {
@@ -35,6 +31,7 @@ export type MoveTaskVariables = {
   id: string
   targetStatus: TaskStatusFilter
   targetPosition?: number
+  workspaceId: string | null
 }
 
 export type ReorderTasksVariables = {
@@ -42,6 +39,7 @@ export type ReorderTasksVariables = {
     id: string
     position: number
     status: TaskStatusFilter
+    workspaceId: string | null
   }>
 }
 
@@ -51,10 +49,7 @@ function snapshotTasks(
   return qc.getQueriesData<Task[]>({ queryKey: taskKeys.lists() })
 }
 
-function patchTasks(
-  qc: QueryClient,
-  patch: (tasks: Task[]) => Task[],
-): void {
+function patchTasks(qc: QueryClient, patch: (tasks: Task[]) => Task[]): void {
   qc.setQueriesData<Task[]>({ queryKey: taskKeys.lists() }, (old) =>
     old ? patch(old) : old,
   )
@@ -70,21 +65,24 @@ function rollback(
 }
 
 /**
- * Single dashboard query for all active tasks (TODO + IN_PROGRESS).
+ * Single dashboard query for the current workspace (TODO + IN_PROGRESS).
  * Prefer this over calling useTasks twice — halves network roundtrips.
  */
-export function useDashboardTasks() {
+export function useDashboardTasks(workspaceId: string | null) {
   return useQuery({
-    queryKey: taskKeys.list(),
-    queryFn: () => getTasks({ data: {} }),
+    queryKey: taskKeys.list({ workspaceId }),
+    queryFn: () => getTasks({ data: { workspaceId } }),
     staleTime: TASKS_STALE_TIME_MS,
   })
 }
 
-export function useTasks(status?: TaskStatusFilter) {
+export function useTasks(
+  workspaceId: string | null,
+  status?: TaskStatusFilter,
+) {
   return useQuery({
-    queryKey: status ? taskKeys.list({ status }) : taskKeys.list(),
-    queryFn: () => getTasks({ data: status ? { status } : {} }),
+    queryKey: taskKeys.list({ workspaceId, status }),
+    queryFn: () => getTasks({ data: { workspaceId, status } }),
     staleTime: TASKS_STALE_TIME_MS,
   })
 }
@@ -93,15 +91,15 @@ export function useTasks(status?: TaskStatusFilter) {
  * Fire-and-forget archive on mount. Only invalidates caches if rows changed,
  * so a no-op archive does not force an extra dashboard refetch.
  */
-export function useArchiveOnMount() {
-  const archive = useArchiveExpiredTasks()
-  const didRun = useRef(false)
+export function useArchiveOnMount(workspaceId: string | null) {
+  const archive = useArchiveExpiredTasks(workspaceId)
+  const didRun = useRef<string | null | boolean>(null)
 
   useEffect(() => {
-    if (didRun.current) return
-    didRun.current = true
-    archive.mutate()
-  }, [archive])
+    if (didRun.current === workspaceId) return
+    didRun.current = workspaceId
+    archive.mutate({ workspaceId })
+  }, [archive, workspaceId])
 }
 
 export function useCreateTask() {
@@ -111,6 +109,7 @@ export function useCreateTask() {
       title: string
       description?: string
       dueDate?: string
+      workspaceId: string | null
     }) => createTaskFn({ data: input }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: taskKeys.lists() })
@@ -159,9 +158,7 @@ export function useDeleteTask() {
       await qc.cancelQueries({ queryKey: taskKeys.lists() })
       const previous = snapshotTasks(qc)
 
-      patchTasks(qc, (old) =>
-        old.filter((task) => task.id !== variables.id),
-      )
+      patchTasks(qc, (old) => old.filter((task) => task.id !== variables.id))
 
       return { previous }
     },
@@ -253,9 +250,7 @@ export function useCompleteTask() {
       await qc.cancelQueries({ queryKey: taskKeys.lists() })
       const previous = snapshotTasks(qc)
 
-      patchTasks(qc, (old) =>
-        old.filter((task) => task.id !== variables.id),
-      )
+      patchTasks(qc, (old) => old.filter((task) => task.id !== variables.id))
 
       return { previous }
     },
@@ -269,10 +264,11 @@ export function useCompleteTask() {
   })
 }
 
-export function useArchiveExpiredTasks() {
+export function useArchiveExpiredTasks(workspaceId: string | null) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: () => archiveExpiredTasksFn(),
+    mutationFn: (input: { workspaceId: string | null }) =>
+      archiveExpiredTasksFn({ data: { workspaceId: input.workspaceId } }),
     onSuccess: (data) => {
       // Only refetch if something actually changed — avoids extra dashboard
       // roundtrip when archive is a no-op (most page loads).

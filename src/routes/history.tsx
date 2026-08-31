@@ -1,7 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
-
-import { HistoryPage } from '@/features/history/HistoryPage'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/history')({
-  component: HistoryPage,
+  beforeLoad: () => {
+    throw redirect({
+      to: '/w/$workspaceId/history',
+      params: { workspaceId: 'default' },
+    })
+  },
 })

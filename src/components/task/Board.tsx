@@ -1,9 +1,6 @@
 import type { ReactNode } from 'react'
 import { useDroppable } from '@dnd-kit/core'
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 export type BoardStatus = 'TODO' | 'IN_PROGRESS'
 
@@ -32,7 +29,9 @@ export function Board({
         <h2 className="text-sm font-bold uppercase tracking-widest text-ink dark:text-dark-ink">
           {title}
           {count !== undefined && (
-            <span className="ml-2 text-muted dark:text-dark-muted">({count})</span>
+            <span className="ml-2 text-muted dark:text-dark-muted">
+              ({count})
+            </span>
           )}
         </h2>
         {actions && <div>{actions}</div>}
@@ -42,7 +41,9 @@ export function Board({
           ref={setNodeRef}
           data-status={status}
           className={`flex min-h-[60px] flex-col gap-2 rounded-brutal-sm border-2 border-dashed border-transparent p-1 transition-colors ${
-            isOver ? 'border-pink bg-pink-light/30 dark:border-dark-pink dark:bg-dark-pink-light/30' : ''
+            isOver
+              ? 'border-pink bg-pink-light/30 dark:border-dark-pink dark:bg-dark-pink-light/30'
+              : ''
           }`}
         >
           {children}

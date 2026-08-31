@@ -10,9 +10,10 @@ import { useCompleteTask, useDeleteTask, useMoveTask } from '@/features/tasks'
 type TaskCardProps = {
   task: Task
   onEdit?: (task: Task) => void
+  workspaceId: string | null
 }
 
-export function TaskCard({ task, onEdit }: TaskCardProps) {
+export function TaskCard({ task, onEdit, workspaceId }: TaskCardProps) {
   const remove = useDeleteTask()
   const complete = useCompleteTask()
   const move = useMoveTask()
@@ -27,13 +28,17 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
   } = useSortable({ id: task.id })
 
   const handleStart = () => {
-    move.mutate({ id: task.id, targetStatus: 'IN_PROGRESS' })
+    move.mutate({
+      id: task.id,
+      targetStatus: 'IN_PROGRESS',
+      workspaceId,
+    })
   }
   const handleComplete = () => {
     complete.mutate({ id: task.id })
   }
   const handleMoveBack = () => {
-    move.mutate({ id: task.id, targetStatus: 'TODO' })
+    move.mutate({ id: task.id, targetStatus: 'TODO', workspaceId })
   }
   const handleDelete = (e: MouseEvent) => {
     e.stopPropagation()

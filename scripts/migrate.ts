@@ -1,9 +1,10 @@
 import { config } from 'dotenv'
-config({ path: '.env.local' })
 
 import { readFileSync } from 'node:fs'
 import dns from 'node:dns/promises'
 import { Pool } from 'pg'
+
+config({ path: '.env.local' })
 
 const url = process.env.DATABASE_URL
 if (!url) {
@@ -51,7 +52,10 @@ const pool = new Pool({
   connectionTimeoutMillis: 15000,
 })
 
-const sqlPath = new URL('../src/db/migrations/0000_yellow_preak.sql', import.meta.url)
+const sqlPath = new URL(
+  '../src/db/migrations/0000_yellow_preak.sql',
+  import.meta.url,
+)
 const sql = readFileSync(sqlPath, 'utf8')
 const statements = sql
   .split('--> statement-breakpoint')
@@ -92,7 +96,8 @@ try {
   console.log('\n=== Enums ===')
   for (const r of enums.rows) console.log(' -', r.typname)
   console.log('\n=== Indexes ===')
-  for (const r of indexes.rows) console.log(` - ${r.indexname} on ${r.tablename}`)
+  for (const r of indexes.rows)
+    console.log(` - ${r.indexname} on ${r.tablename}`)
 } finally {
   await pool.end()
 }

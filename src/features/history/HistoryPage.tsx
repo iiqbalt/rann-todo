@@ -1,5 +1,6 @@
 import { History as HistoryIcon } from 'lucide-react'
 import { useHistory } from '@/features/history'
+import { useCurrentWorkspace } from '@/features/workspaces'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { HistoryCard } from '@/components/history/HistoryCard'
 
@@ -15,7 +16,8 @@ function formatDateHeading(dateStr: string): string {
 }
 
 export function HistoryPage() {
-  const { data: groups = [], isLoading, isError } = useHistory()
+  const { workspaceId } = useCurrentWorkspace()
+  const { data: groups = [], isLoading, isError } = useHistory(workspaceId)
 
   const totalTasks = groups.reduce((sum, g) => sum + g.tasks.length, 0)
 
@@ -34,7 +36,9 @@ export function HistoryPage() {
       </header>
 
       {isLoading ? (
-        <div className="py-12 text-center text-muted dark:text-dark-muted">Loading history...</div>
+        <div className="py-12 text-center text-muted dark:text-dark-muted">
+          Loading history...
+        </div>
       ) : isError ? (
         <EmptyState
           icon={<HistoryIcon className="h-12 w-12" />}

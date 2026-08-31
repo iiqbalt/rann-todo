@@ -50,7 +50,9 @@ function NotFound() {
       <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted dark:text-dark-muted">
         404
       </p>
-      <h1 className="mt-2 text-2xl font-bold text-ink dark:text-dark-ink">Page not found</h1>
+      <h1 className="mt-2 text-2xl font-bold text-ink dark:text-dark-ink">
+        Page not found
+      </h1>
       <p className="mt-2 text-sm text-muted dark:text-dark-muted">
         The page you&apos;re looking for doesn&apos;t exist or has been moved.
       </p>

@@ -1,7 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
-
-import { DashboardPage } from '@/features/dashboard/DashboardPage'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
-  component: DashboardPage,
+  beforeLoad: () => {
+    throw redirect({
+      to: '/w/$workspaceId',
+      params: { workspaceId: 'default' },
+    })
+  },
 })

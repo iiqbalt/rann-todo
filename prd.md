@@ -216,33 +216,33 @@ Use:
 
 ## Users
 
-| Column | Type |
-|---------|------|
-| id | uuid |
-| name | text |
-| email | text |
+| Column     | Type      |
+| ---------- | --------- |
+| id         | uuid      |
+| name       | text      |
+| email      | text      |
 | created_at | timestamp |
 
 ---
 
 ## Tasks
 
-| Column | Type |
-|---------|------|
-| id | uuid |
-| user_id | uuid |
-| title | text |
-| description | text |
-| status | TaskStatus |
-| position | integer |
-| due_date | timestamp |
-| started_at | timestamp |
-| completed_at | timestamp |
-| archived_at | timestamp |
-| estimated_minutes | integer |
-| focus_count | integer |
-| created_at | timestamp |
-| updated_at | timestamp |
+| Column            | Type       |
+| ----------------- | ---------- |
+| id                | uuid       |
+| user_id           | uuid       |
+| title             | text       |
+| description       | text       |
+| status            | TaskStatus |
+| position          | integer    |
+| due_date          | timestamp  |
+| started_at        | timestamp  |
+| completed_at      | timestamp  |
+| archived_at       | timestamp  |
+| estimated_minutes | integer    |
+| focus_count       | integer    |
+| created_at        | timestamp  |
+| updated_at        | timestamp  |
 
 ---
 

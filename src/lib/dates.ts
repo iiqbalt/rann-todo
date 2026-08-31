@@ -18,16 +18,12 @@ export function fromDatetimeLocal(local: string): string | null {
   return d.toISOString()
 }
 
-export function isOverdue(
-  date: Date | string | null | undefined,
-): boolean {
+export function isOverdue(date: Date | string | null | undefined): boolean {
   if (!date) return false
   return new Date(date) < new Date()
 }
 
-export function formatDueDate(
-  date: Date | string | null | undefined,
-): string {
+export function formatDueDate(date: Date | string | null | undefined): string {
   if (!date) return ''
   const d = new Date(date)
   if (Number.isNaN(d.getTime())) return ''
@@ -35,9 +31,7 @@ export function formatDueDate(
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const target = new Date(d.getFullYear(), d.getMonth(), d.getDate())
-  const diffDays = Math.round(
-    (target.getTime() - today.getTime()) / 86_400_000,
-  )
+  const diffDays = Math.round((target.getTime() - today.getTime()) / 86_400_000)
 
   const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`
 

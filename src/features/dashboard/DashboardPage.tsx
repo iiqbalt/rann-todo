@@ -7,22 +7,21 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
 } from '@dnd-kit/core'
-import {
-  arrayMove,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable'
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { ListTodo, Plus } from 'lucide-react'
 import type { Task } from '@/db/schema'
 
 import {
   useArchiveOnMount,
+  useCreateTask,
   useDashboardTasks,
   useReorderTasks,
 } from '@/features/tasks'
-import { Board, type BoardStatus } from '@/components/task/Board'
+import { useCurrentWorkspace } from '@/features/workspaces'
+import { Board } from '@/components/task/Board'
+import type { BoardStatus } from '@/components/task/Board'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { TaskCard } from '@/components/task/TaskCard'
 import { TaskEditorModal } from '@/components/task/TaskEditorModal'
@@ -31,6 +30,7 @@ type ReorderItem = {
   id: string
   position: number
   status: BoardStatus
+  workspaceId: string | null
 }
 
 function byPosition(a: Task, b: Task) {
@@ -38,30 +38,33 @@ function byPosition(a: Task, b: Task) {
 }
 
 export function DashboardPage() {
+  const { workspaceId } = useCurrentWorkspace()
   const [createOpen, setCreateOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
 
   // Single network request for both boards (Phase 1)
-  const { data: allTasks = [] } = useDashboardTasks()
+  const { data: allTasks = [] } = useDashboardTasks(workspaceId)
   const reorder = useReorderTasks()
+  const create = useCreateTask()
 
   // Non-blocking archive on mount (Phase 2) — does not block first paint
-  useArchiveOnMount()
+  useArchiveOnMount(workspaceId)
 
   const todoTasks = useMemo(
     () => allTasks.filter((t) => t.status === 'TODO').sort(byPosition),
     [allTasks],
   )
   const inProgressTasks = useMemo(
-    () =>
-      allTasks.filter((t) => t.status === 'IN_PROGRESS').sort(byPosition),
+    () => allTasks.filter((t) => t.status === 'IN_PROGRESS').sort(byPosition),
     [allTasks],
   )
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   )
 
   const tasksByStatus = useMemo<Record<BoardStatus, Task[]>>(
@@ -90,7 +93,12 @@ export function DashboardPage() {
       const updates: ReorderItem[] = []
       reordered.forEach((task, idx) => {
         if (task.position !== idx) {
-          updates.push({ id: task.id, position: idx, status: sourceStatus })
+          updates.push({
+            id: task.id,
+            position: idx,
+            status: sourceStatus,
+            workspaceId,
+          })
         }
       })
       return updates
@@ -106,13 +114,23 @@ export function DashboardPage() {
     const updates: ReorderItem[] = []
     newSource.forEach((task, idx) => {
       if (task.position !== idx) {
-        updates.push({ id: task.id, position: idx, status: sourceStatus })
+        updates.push({
+          id: task.id,
+          position: idx,
+          status: sourceStatus,
+          workspaceId,
+        })
       }
     })
     newDest.forEach((task, idx) => {
       const isMoved = task.id === sourceId
       if (task.position !== idx || isMoved) {
-        updates.push({ id: task.id, position: idx, status: destStatus })
+        updates.push({
+          id: task.id,
+          position: idx,
+          status: destStatus,
+          workspaceId,
+        })
       }
     })
     return updates
@@ -176,6 +194,16 @@ export function DashboardPage() {
     setEditingTask(null)
   }
 
+  const handleCreate = () => setCreateOpen(true)
+
+  const handleSubmitFromModal = (input: {
+    title: string
+    description?: string
+    dueDate?: string
+  }) => {
+    create.mutate({ ...input, workspaceId })
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-8 py-6">
       <header className="mb-4 flex items-baseline justify-between">
@@ -192,7 +220,7 @@ export function DashboardPage() {
 
       <button
         type="button"
-        onClick={() => setCreateOpen(true)}
+        onClick={handleCreate}
         className="mb-4 flex w-full items-center gap-3 rounded-brutal border-2 border-dashed border-ink/15 bg-warm/60 px-4 py-3 text-left text-muted transition-colors hover:border-pink hover:text-ink dark:border-dark-ink/15 dark:bg-dark-warm/60 dark:text-dark-muted dark:hover:border-dark-pink dark:hover:text-dark-ink"
       >
         <Plus className="h-4 w-4" />
@@ -225,6 +253,7 @@ export function DashboardPage() {
                   key={task.id}
                   task={task}
                   onEdit={setEditingTask}
+                  workspaceId={workspaceId}
                 />
               ))
             )}
@@ -248,6 +277,7 @@ export function DashboardPage() {
                   key={task.id}
                   task={task}
                   onEdit={setEditingTask}
+                  workspaceId={workspaceId}
                 />
               ))
             )}
@@ -263,6 +293,7 @@ export function DashboardPage() {
         open={modalOpen}
         task={editingTask}
         onClose={closeModal}
+        onCreate={handleSubmitFromModal}
       />
     </div>
   )

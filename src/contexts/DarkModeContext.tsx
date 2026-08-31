@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 
 const STORAGE_KEY = 'rann:dark-mode'
 
@@ -7,7 +8,9 @@ type DarkModeContextType = {
   toggleDarkMode: () => void
 }
 
-const DarkModeContext = createContext<DarkModeContextType | undefined>(undefined)
+const DarkModeContext = createContext<DarkModeContextType | undefined>(
+  undefined,
+)
 
 function readDarkMode(): boolean {
   if (typeof window === 'undefined') return false
@@ -31,7 +34,7 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
     if (!isMounted) return
     console.log('Setting dark mode to:', isDarkMode)
     window.localStorage.setItem(STORAGE_KEY, String(isDarkMode))
-    
+
     if (isDarkMode) {
       document.documentElement.classList.add('dark')
       console.log('Added dark class to html')
