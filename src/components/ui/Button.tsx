@@ -1,7 +1,7 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'destructive'
-type Size = 'sm' | 'md' | 'lg'
+type Size = 'xs' | 'sm' | 'md' | 'lg'
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant
@@ -11,11 +11,13 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 const variantClasses: Record<Variant, string> = {
   primary: 'bg-pink text-ink dark:bg-dark-pink dark:text-dark-ink',
   secondary: 'bg-ivory text-ink dark:bg-dark-ivory dark:text-dark-ink',
-  ghost: 'bg-transparent text-ink border-transparent shadow-none dark:text-dark-ink',
+  ghost:
+    'bg-transparent text-ink border-transparent shadow-none dark:text-dark-ink',
   destructive: 'bg-rose text-ink dark:bg-dark-rose dark:text-dark-ink',
 }
 
 const sizeClasses: Record<Size, string> = {
+  xs: 'p-1.5',
   sm: 'px-3 py-1.5 text-sm',
   md: 'px-4 py-2 text-base',
   lg: 'px-6 py-3 text-lg',
