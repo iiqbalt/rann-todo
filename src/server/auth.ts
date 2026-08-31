@@ -8,16 +8,16 @@ const DEV_USER_NAME = 'Dev User'
 let ensured = false
 
 export async function getCurrentUserId(): Promise<string> {
-    if (!ensured) {
-        await db
-            .insert(users)
-            .values({
-                id: DEV_USER_ID,
-                name: DEV_USER_NAME,
-                email: DEV_USER_EMAIL,
-            })
-            .onConflictDoNothing()
-        ensured = true
-    }
-    return DEV_USER_ID
+  if (!ensured) {
+    await db
+      .insert(users)
+      .values({
+        id: DEV_USER_ID,
+        name: DEV_USER_NAME,
+        email: DEV_USER_EMAIL,
+      })
+      .onConflictDoNothing()
+    ensured = true
+  }
+  return DEV_USER_ID
 }

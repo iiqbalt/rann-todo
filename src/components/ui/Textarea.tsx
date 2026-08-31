@@ -1,4 +1,5 @@
-import { forwardRef, type TextareaHTMLAttributes } from 'react'
+import { forwardRef } from 'react'
+import type { TextareaHTMLAttributes } from 'react'
 
 type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement>
 

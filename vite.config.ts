@@ -1,4 +1,5 @@
-import { defineConfig, type PluginOption } from 'vite'
+import { defineConfig } from 'vite'
+import type { PluginOption } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -19,33 +20,33 @@ import { nitro } from 'nitro/vite'
 // itself (NOT via `apply()`), because in `vite dev` `env.ssr` is undefined
 // and `apply()` can't reliably distinguish. `options.ssr` is set per-request.
 const stubNodeModulesForClient = (): PluginOption => ({
-    name: 'stub-node-modules-for-client',
-    enforce: 'pre',
-    resolveId(source, _importer, options) {
-        const ssr = (options as { ssr?: boolean } | undefined)?.ssr
-        if (ssr) return null
-        // NOTE: do NOT stub 'server-only' — let the original module throw on
-        // client-side import. That's its whole purpose. Stubbing it to a no-op
-        // breaks the protection and lets server-only files load on the client.
-        if (source === 'node:dns' || source === 'dns') {
-            return '\0dns-client-stub'
-        }
-        if (source === 'pg' || source.startsWith('pg/')) {
-            return '\0pg-client-stub'
-        }
-        if (source === 'drizzle-orm/node-postgres') {
-            return '\0drizzle-pg-client-stub'
-        }
-        return null
-    },
-    load(id, options) {
-        const ssr = (options as { ssr?: boolean } | undefined)?.ssr
-        if (ssr) return null
-        if (id === '\0dns-client-stub') {
-            return `export default { setServers() {}, getServers() { return [] } }`
-        }
-        if (id === '\0pg-client-stub') {
-            return `
+  name: 'stub-node-modules-for-client',
+  enforce: 'pre',
+  resolveId(source, _importer, options) {
+    const ssr = (options as { ssr?: boolean } | undefined)?.ssr
+    if (ssr) return null
+    // NOTE: do NOT stub 'server-only' — let the original module throw on
+    // client-side import. That's its whole purpose. Stubbing it to a no-op
+    // breaks the protection and lets server-only files load on the client.
+    if (source === 'node:dns' || source === 'dns') {
+      return '\0dns-client-stub'
+    }
+    if (source === 'pg' || source.startsWith('pg/')) {
+      return '\0pg-client-stub'
+    }
+    if (source === 'drizzle-orm/node-postgres') {
+      return '\0drizzle-pg-client-stub'
+    }
+    return null
+  },
+  load(id, options) {
+    const ssr = options?.ssr
+    if (ssr) return null
+    if (id === '\0dns-client-stub') {
+      return `export default { setServers() {}, getServers() { return [] } }`
+    }
+    if (id === '\0pg-client-stub') {
+      return `
 export class Pool {}
 export class Client {}
 export class Database {}
@@ -56,29 +57,29 @@ export const types = {
   arrayParser: { create: () => null },
 }
 `
-        }
-        if (id === '\0drizzle-pg-client-stub') {
-            return `
+    }
+    if (id === '\0drizzle-pg-client-stub') {
+      return `
 export function drizzle() {
   return new Proxy({}, { get: () => () => {} })
 }
 export default { drizzle }
 `
-        }
-        return null
-    },
+    }
+    return null
+  },
 })
 
 const config = defineConfig({
-    resolve: { tsconfigPaths: true },
-    plugins: [
-        stubNodeModulesForClient(),
-        devtools(),
-        nitro({ rollupConfig: { external: [/^@sentry\//] } }),
-        tailwindcss(),
-        tanstackStart(),
-        viteReact(),
-    ],
+  resolve: { tsconfigPaths: true },
+  plugins: [
+    stubNodeModulesForClient(),
+    devtools(),
+    nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+    tailwindcss(),
+    tanstackStart(),
+    viteReact(),
+  ],
 })
 
 export default config

@@ -1,4 +1,5 @@
-import { type MouseEvent, type ReactNode, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 
 type DialogProps = {
   open: boolean

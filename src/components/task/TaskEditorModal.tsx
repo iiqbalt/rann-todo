@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { Task } from '@/db/schema'
-import { useCreateTask, useUpdateTask } from '@/features/tasks'
+import { useUpdateTask } from '@/features/tasks'
 
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
@@ -12,11 +12,24 @@ type TaskEditorModalProps = {
   open: boolean
   task?: Task | null
   onClose: () => void
+  /**
+   * Called when creating a new task. The parent injects workspace context
+   * (e.g. current workspaceId) so the modal stays workspace-agnostic.
+   */
+  onCreate: (input: {
+    title: string
+    description?: string
+    dueDate?: string
+  }) => void
 }
 
-export function TaskEditorModal({ open, task, onClose }: TaskEditorModalProps) {
+export function TaskEditorModal({
+  open,
+  task,
+  onClose,
+  onCreate,
+}: TaskEditorModalProps) {
   const isEdit = !!task
-  const create = useCreateTask()
   const update = useUpdateTask()
 
   const [title, setTitle] = useState('')
@@ -33,7 +46,7 @@ export function TaskEditorModal({ open, task, onClose }: TaskEditorModalProps) {
     const trimmedTitle = title.trim()
     if (!trimmedTitle) return
 
-    if (isEdit && task) {
+    if (isEdit) {
       update.mutate(
         {
           id: task.id,
@@ -43,17 +56,15 @@ export function TaskEditorModal({ open, task, onClose }: TaskEditorModalProps) {
         { onSuccess: onClose },
       )
     } else {
-      create.mutate(
-        {
-          title: trimmedTitle,
-          description: description.trim() || undefined,
-        },
-        { onSuccess: onClose },
-      )
+      onCreate({
+        title: trimmedTitle,
+        description: description.trim() || undefined,
+      })
+      onClose()
     }
   }
 
-  const isPending = create.isPending || update.isPending
+  const isPending = update.isPending
 
   return (
     <Dialog

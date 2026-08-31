@@ -5,10 +5,10 @@ import { historyKeys } from './api'
 
 const HISTORY_STALE_TIME_MS = 60_000
 
-export function useHistory() {
+export function useHistory(workspaceId: string | null) {
   return useQuery({
-    queryKey: historyKeys.list(),
-    queryFn: () => getHistory(),
+    queryKey: historyKeys.list({ workspaceId }),
+    queryFn: () => getHistory({ data: { workspaceId } }),
     staleTime: HISTORY_STALE_TIME_MS,
   })
 }
