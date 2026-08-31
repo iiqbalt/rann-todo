@@ -22,11 +22,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <PomodoroProvider>
-      <div className="flex min-h-screen bg-cream dark:bg-dark-cream">
+      <div className="flex h-screen min-h-0 bg-cream dark:bg-dark-cream">
         <Sidebar collapsed={collapsed} />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 min-h-0 flex-1 flex-col">
           <Header collapsed={collapsed} onToggle={toggle} />
-          <main className="flex-1 overflow-y-auto">{children}</main>
+          <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
         </div>
       </div>
       <PomodoroDock />
