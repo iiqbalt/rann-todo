@@ -1,13 +1,11 @@
 import type { CSSProperties, MouseEvent } from 'react'
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
-import { Trash2 } from 'lucide-react'
+import { Check, Play, Trash2, Undo2 } from 'lucide-react'
 import type { Task } from '@/db/schema'
-import {
-  useCompleteTask,
-  useDeleteTask,
-  useMoveTask,
-} from '@/features/tasks'
+import { Button } from '@/components/ui/Button'
+import { Tooltip } from '@/components/shared/Tooltip'
+import { useCompleteTask, useDeleteTask, useMoveTask } from '@/features/tasks'
 
 type TaskCardProps = {
   task: Task
@@ -28,14 +26,15 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
     isDragging,
   } = useSortable({ id: task.id })
 
-  const handleToggle = () => {
-    if (task.status === 'IN_PROGRESS') {
-      complete.mutate({ id: task.id })
-    } else {
-      move.mutate({ id: task.id, targetStatus: 'IN_PROGRESS' })
-    }
+  const handleStart = () => {
+    move.mutate({ id: task.id, targetStatus: 'IN_PROGRESS' })
   }
-
+  const handleComplete = () => {
+    complete.mutate({ id: task.id })
+  }
+  const handleMoveBack = () => {
+    move.mutate({ id: task.id, targetStatus: 'TODO' })
+  }
   const handleDelete = (e: MouseEvent) => {
     e.stopPropagation()
     remove.mutate({ id: task.id })
@@ -47,6 +46,8 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
     opacity: isDragging ? 0.4 : 1,
   }
 
+  const isInProgress = task.status === 'IN_PROGRESS'
+
   return (
     <div
       ref={setNodeRef}
@@ -57,14 +58,44 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
           : 'border-ink/15 dark:border-dark-ink/15'
       }`}
     >
-      <button
-        type="button"
-        onClick={handleToggle}
-        aria-label={
-          task.status === 'IN_PROGRESS' ? 'Complete task' : 'Move to in progress'
-        }
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-ink/40 transition-colors hover:border-pink hover:bg-pink-light dark:border-dark-ink/40 dark:hover:border-dark-pink dark:hover:bg-dark-pink-light"
-      />
+      {isInProgress ? (
+        <div className="flex shrink-0 items-center gap-2">
+          <Tooltip label="Selesaikan">
+            <Button
+              type="button"
+              size="xs"
+              variant="primary"
+              onClick={handleComplete}
+              aria-label="Selesaikan tugas"
+            >
+              <Check className="h-3.5 w-3.5" strokeWidth={3} />
+            </Button>
+          </Tooltip>
+          <Tooltip label="Kembali">
+            <Button
+              type="button"
+              size="xs"
+              variant="secondary"
+              onClick={handleMoveBack}
+              aria-label="Kembalikan ke todo"
+            >
+              <Undo2 className="h-3.5 w-3.5" />
+            </Button>
+          </Tooltip>
+        </div>
+      ) : (
+        <Tooltip label="Mulai">
+          <Button
+            type="button"
+            size="xs"
+            variant="primary"
+            onClick={handleStart}
+            aria-label="Mulai tugas"
+          >
+            <Play className="h-3.5 w-3.5" />
+          </Button>
+        </Tooltip>
+      )}
       <button
         type="button"
         onClick={() => onEdit?.(task)}
@@ -72,7 +103,9 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
         {...listeners}
         className="flex flex-1 cursor-grab flex-col items-start gap-0.5 text-left active:cursor-grabbing"
       >
-        <span className="w-full truncate text-base text-ink dark:text-dark-ink">{task.title}</span>
+        <span className="w-full truncate text-base text-ink dark:text-dark-ink">
+          {task.title}
+        </span>
       </button>
       <button
         type="button"
