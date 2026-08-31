@@ -19,7 +19,8 @@ export function Sidebar({ collapsed }: SidebarProps) {
   const wsParam = rawId || DEFAULT_WORKSPACE_SLUG
 
   const dashboardActive =
-    pathname === '/' || pathname.startsWith('/w/$workspaceId')
+    pathname === '/' ||
+    (pathname.startsWith('/w/') && !pathname.endsWith('/history'))
   const historyActive = pathname === '/history' || pathname.endsWith('/history')
 
   return (
@@ -43,6 +44,9 @@ export function Sidebar({ collapsed }: SidebarProps) {
             </span>
           )}
         </div>
+
+        <WorkspaceSwitcher collapsed={collapsed} />
+        <div className="h-px w-full bg-ink/10 dark:bg-dark-ink/10" />
 
         <nav className="flex flex-col gap-2">
           <Link
@@ -82,10 +86,6 @@ export function Sidebar({ collapsed }: SidebarProps) {
             {!collapsed && 'History'}
           </Link>
         </nav>
-
-        <div className="h-px w-full bg-ink/10 dark:bg-dark-ink/10" />
-
-        <WorkspaceSwitcher collapsed={collapsed} />
       </div>
     </aside>
   )
