@@ -106,7 +106,7 @@ export function TaskCard({ task, onEdit, workspaceId }: TaskCardProps) {
         onClick={() => onEdit?.(task)}
         {...attributes}
         {...listeners}
-        className="flex flex-1 cursor-grab flex-col items-start gap-0.5 text-left active:cursor-grabbing"
+        className="flex min-w-0 flex-1 cursor-grab flex-col items-start gap-0.5 text-left active:cursor-grabbing"
       >
         <span className="w-full truncate text-base text-ink dark:text-dark-ink">
           {task.title}
